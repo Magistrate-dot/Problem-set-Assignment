@@ -1,0 +1,170 @@
+---
+title: "Problem set assignment"
+author: "Callum Barnsley"
+format: html
+editor: visual
+---
+
+## 
+
+#hearder Problem set question 1 : You are given two objects that are meant to be merged and then plotted, but the join key is misspelled and the plot is using the wrong column.
+
+1.  Correct the `merge()` so that it actually merges on the car names.
+
+2.  Correct the plot so that it colours points by the two-level factor created in `df_labels`.
+
+3.  Make sure the legend shows exactly two items with readable labels.
+
+4.  In 3–4 sentences, explain how `by.x` and `by.y` work in `merge()`.
+
+When doing a Merge(), by.x and by.y are used by R which column name to use as the key. For example by.x will tell R which column name to use as the key form the first data frame, and by.y tells it which column to use from the second data frame. This is useful when combining data held within two different columns with different names. If you do not use by.x and by.y when doing a merge() it will assume the key columns have the same name in both data frames.
+
+below is the code that answer to the question.
+
+```{r}
+df_cars <- mtcars
+df_cars$carname <- rownames(mtcars)
+
+df_labels <- data.frame(
+  carname = rownames(mtcars),
+  cyl_group = ifelse(mtcars$cyl >= 6, "high cylinders", "low cylinders"),
+  stringsAsFactors = FALSE
+)
+
+
+merged <- merge(df_cars, df_labels, by.x = "row.names", by.y = "carname")
+
+merged$cyl_group <- factor(merged$cyl_group)
+
+plot(merged$hp, merged$mpg,
+     col = merged$cyl_group,   
+     pch = 19,
+     xlab = "Horsepower",
+     ylab = "Miles per gallon")
+
+
+legend("topright", legend = unique(merged$cyl_group), pch = 19,
+       col = seq_along(unique(merged$cyl_group)))
+```
+
+#header Problem set question 2: Wide to long and grouped summaries
+
+1.  Using **base R only** (no `tidyr::pivot_longer()`), reshape this into a long form with columns: `id`, `year`, `value`.
+
+2.  Compute the mean `value` per `year` in base R (e.g. `tapply`, `aggregate`).
+
+3.  In 2–3 sentences, explain why long format is often easier to plot/analyse.
+
+The answers to the questions is below.
+
+Long format tends to be easier to plot and analyse because the information it stores is held within columns and observations are stored in rows, this matches the trend of how most plotting and modelling functions assume the data is structured. This makes it straightforward to map variables to aesthetics (x, y, colour) and to apply grouped summaries or statistical models. In brief, Whereas wide first is good for data entry, long format is better for analysis, modeling and summaries.
+
+```{r}
+set.seed(42)
+df_wide <- data.frame(
+  id = 1:5,
+  meas_2020 = rnorm(5, 10, 1),
+  meas_2021 = rnorm(5, 11, 1),
+  meas_2022 = rnorm(5, 12, 1)
+)
+
+## reshape from wide to long
+df_long <- reshape(
+  df_wide,
+  varying = c("meas_2020", "meas_2021", "meas_2022"),
+  v.names = "value",
+  timevar = "year",
+  times = c(2020, 2021, 2022),
+  idvar = "id",
+  direction = "long"
+)
+
+row.names(df_long) <- NULL
+df_long
+
+## mean value per year
+aggregate(value ~ year, data = df_long, FUN = mean)
+
+```
+
+#header Problem set question 3 : Controlled randomness and NA handling
+
+1.  Explain what `set.seed(123)` guarantees.
+
+2.  Write code to replace the `NA`s in `x` with the **median** of the non-missing values (base R only).
+
+3.  Show that after replacement `mean(x)` no longer returns `NA`.
+
+4.  In 2–3 sentences, discuss one *downside* of median imputation.
+
+The answers to the questions is bellow.
+
+One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median) it creates an artificial spike at that value, this causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results, and change the outcomes of hypothesis tests.
+
+```{r}
+##set.seed(123) guarentees that the random number generation in R
+## is repeatable and predictable for debugging,research, etc.###
+set.seed(123)
+x <- rnorm(20, mean = 5, sd = 2)
+x[sample(1:20, 4)] <- NA
+##mean before replacing NA's
+mean(x)
+##replace NA's in x with non-missing values.
+x[is.na(x)] <- median(x, na.rm = TRUE)
+
+##mean after replacement
+mean(x)
+```
+
+#header Problem set question 4 : Writing a small, flexible summary function
+
+Write an R function called `my_summary()` that:
+
+-   takes a data frame and a **character vector of column names**,
+
+-   checks that **all** specified columns are numeric,
+
+-   returns a data frame with rows = variables and columns = `n`, `mean`, `sd`.
+
+Then demonstrate it on `mtcars` for columns `c("mpg", "hp", "wt")`.
+
+Explain briefly why using `[[` inside the function is safer than `$` for programmatic column selection.
+
+The answers to the question is below.
+
+Using \[\[ inside of a function is safer than \$ for a couple of reasons. The first is due to how it is designed for programmatic access and how it can reliably work with column names stored as character strings. On the other hand, \$ only works with literal names however it can perform partial matching, but this can silently return NULL if a column is missing causing bugs to be harder to detect.
+
+```{r}
+## Define the function
+my_summary <- function(df, cols) {
+  
+  # Check that df is a data frame
+  if (!is.data.frame(df)) {
+    stop("df must be a data frame")
+  }
+  
+  # Check that all requested columns exist
+  if (!all(cols %in% names(df))) {
+    stop("Some columns are not present in the data frame")
+  }
+  
+  # Check that all specified columns are numeric
+  non_numeric <- cols[!sapply(cols, function(x) is.numeric(df[[x]]))]
+  if (length(non_numeric) > 0) {
+    stop(paste("Non-numeric columns:", paste(non_numeric, collapse = ", ")))
+  }
+  
+  # Create summary statistics
+  summary_df <- data.frame(
+    n = sapply(cols, function(x) sum(!is.na(df[[x]]))),
+    mean = sapply(cols, function(x) mean(df[[x]], na.rm = TRUE)),
+    sd = sapply(cols, function(x) sd(df[[x]], na.rm = TRUE)),
+    row.names = cols
+  )
+  
+  return(summary_df)
+}
+
+## Demonstration using mtcars
+my_summary(mtcars, c("mpg", "hp", "wt"))
+```
