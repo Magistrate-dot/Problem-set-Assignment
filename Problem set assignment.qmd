@@ -5,9 +5,7 @@ format: html
 editor: visual
 ---
 
-## 
-
-#hearder Problem set question 1 : You are given two objects that are meant to be merged and then plotted, but the join key is misspelled and the plot is using the wrong column.
+### Question 1 : You are given two objects that are meant to be merged and then plotted, but the join key is misspelled and the plot is using the wrong column.
 
 1.  Correct the `merge()` so that it actually merges on the car names.
 
@@ -19,7 +17,7 @@ editor: visual
 
 When doing a Merge(), by.x and by.y are used by R which column name to use as the key. For example by.x will tell R which column name to use as the key form the first data frame, and by.y tells it which column to use from the second data frame. This is useful when combining data held within two different columns with different names. If you do not use by.x and by.y when doing a merge() it will assume the key columns have the same name in both data frames.
 
-below is the code that answer to the question.
+The answer to the question is below.
 
 ```{r}
 df_cars <- mtcars
@@ -47,7 +45,7 @@ legend("topright", legend = unique(merged$cyl_group), pch = 19,
        col = seq_along(unique(merged$cyl_group)))
 ```
 
-#header Problem set question 2: Wide to long and grouped summaries
+### Question 2:  Wide to long and grouped summaries
 
 1.  Using **base R only** (no `tidyr::pivot_longer()`), reshape this into a long form with columns: `id`, `year`, `value`.
 
@@ -87,7 +85,7 @@ aggregate(value ~ year, data = df_long, FUN = mean)
 
 ```
 
-#header Problem set question 3 : Controlled randomness and NA handling
+### Question 3 : Controlled randomness and NA handling
 
 1.  Explain what `set.seed(123)` guarantees.
 
@@ -97,7 +95,7 @@ aggregate(value ~ year, data = df_long, FUN = mean)
 
 4.  In 2–3 sentences, discuss one *downside* of median imputation.
 
-The answers to the questions is bellow.
+The answers to the questions is below.
 
 One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median) it creates an artificial spike at that value, this causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results, and change the outcomes of hypothesis tests.
 
@@ -116,7 +114,7 @@ x[is.na(x)] <- median(x, na.rm = TRUE)
 mean(x)
 ```
 
-#header Problem set question 4 : Writing a small, flexible summary function
+### Question 4 : Writing a small, flexible summary function
 
 Write an R function called `my_summary()` that:
 
@@ -166,5 +164,48 @@ my_summary <- function(df, cols) {
 }
 
 ## Demonstration using mtcars
-my_summary(mtcars, c("mpg", "hp", "wt"))
+my_summary(mtcars, c("mpg", "hp", "wt")) 
+```
+
+### Question 5: Regular expressions for variable name cleaning
+
+1.  Using **only base R string tools** (`gsub`, `trimws`, etc.), clean these so that:
+
+    -   spaces are trimmed,
+
+    -   everything is lower case,
+
+    -   punctuation `(`, `)`, `%`, `.` is replaced with `_`,
+
+    -   multiple `_` are collapsed to a single `_`,
+
+    -   names do **not** start with a digit (prefix with `"x_"` if they do).
+
+2.  Return a cleaned character vector called `vars_clean`.
+
+3.  In 3–4 sentences, justify your regex choices.
+
+The answers to the questions are below.
+
+The regex that I chose to use was a character class (\[, (). %\]) to target only the specified punctuation and replace them with underscores. I have used the broader class \[\^  a - z 0-9\_\] to make any non-alphanumeric characters normalised safely without messing with the underscores already there. The pattern “\_+” collapses runs of underscores created by multiple substitutions into a single underscore, this is to avoid messy names. Finally, I have used \^ (\[0-9\]) to check the start of the string so only the first digits are prefixed with “x\_”, leaving the internal numbers alone.
+
+```{r}
+vars <- c("  temp.C ", "RH(%)", "soil-moisture", "2nd_reading", "sensor.ID")
+
+vars_clean <- vars
+ # trim spaces
+vars_clean <- trimws(vars_clean)
+# lowercase
+vars_clean <- tolower(vars_clean) 
+# replace specific punctuation with _
+vars_clean <- gsub("[,().%]", "_", vars_clean)
+# replace any remaining non-alphanumeric chars with _
+vars_clean <- gsub("[^a-z0-9_]", "_", vars_clean) 
+# collapse multiple underscores
+vars_clean <- gsub("_+", "_", vars_clean) 
+# prefix starting digits with x_
+vars_clean <- gsub("^([0-9])", "x_\\1", vars_clean) 
+
+vars_clean
+
 ```
