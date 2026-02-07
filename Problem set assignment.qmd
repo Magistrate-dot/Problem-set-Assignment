@@ -21,31 +21,33 @@ The answer to the question is below.
 
 ```{r}
 df_cars <- mtcars
+##add a new column containing the car names.
 df_cars$carname <- rownames(mtcars)
 
+## create data for labels.
 df_labels <- data.frame(
   carname = rownames(mtcars),
   cyl_group = ifelse(mtcars$cyl >= 6, "high cylinders", "low cylinders"),
   stringsAsFactors = FALSE
 )
 
-
+##merge the two data frames using car names as the matching key.
 merged <- merge(df_cars, df_labels, by.x = "row.names", by.y = "carname")
-
+##Conver cyl_group into a factor
 merged$cyl_group <- factor(merged$cyl_group)
-
+##create scatter plot, colour plots.
 plot(merged$hp, merged$mpg,
      col = merged$cyl_group,   
      pch = 19,
      xlab = "Horsepower",
      ylab = "Miles per gallon")
 
-
+##add a legend
 legend("topright", legend = unique(merged$cyl_group), pch = 19,
        col = seq_along(unique(merged$cyl_group)))
 ```
 
-### Question 2:  Wide to long and grouped summaries
+### Question 2: Wide to long and grouped summaries
 
 1.  Using **base R only** (no `tidyr::pivot_longer()`), reshape this into a long form with columns: `id`, `year`, `value`.
 
@@ -136,23 +138,23 @@ Using \[\[ inside of a function is safer than \$ for a couple of reasons. The fi
 ## Define the function
 my_summary <- function(df, cols) {
   
-  # Check that df is a data frame
+  ## Check that df is a data frame
   if (!is.data.frame(df)) {
     stop("df must be a data frame")
   }
   
-  # Check that all requested columns exist
+  ## Check that all requested columns exist
   if (!all(cols %in% names(df))) {
     stop("Some columns are not present in the data frame")
   }
   
-  # Check that all specified columns are numeric
+  ## Check that all specified columns are numeric
   non_numeric <- cols[!sapply(cols, function(x) is.numeric(df[[x]]))]
   if (length(non_numeric) > 0) {
     stop(paste("Non-numeric columns:", paste(non_numeric, collapse = ", ")))
   }
   
-  # Create summary statistics
+  ## Create summary statistics
   summary_df <- data.frame(
     n = sapply(cols, function(x) sum(!is.na(df[[x]]))),
     mean = sapply(cols, function(x) mean(df[[x]], na.rm = TRUE)),
@@ -193,19 +195,195 @@ The regex that I chose to use was a character class (\[, (). %\]) to target only
 vars <- c("  temp.C ", "RH(%)", "soil-moisture", "2nd_reading", "sensor.ID")
 
 vars_clean <- vars
- # trim spaces
+ ## trim spaces
 vars_clean <- trimws(vars_clean)
-# lowercase
+## lowercase
 vars_clean <- tolower(vars_clean) 
-# replace specific punctuation with _
+## replace specific punctuation with _
 vars_clean <- gsub("[,().%]", "_", vars_clean)
-# replace any remaining non-alphanumeric chars with _
+## replace any remaining non-alphanumeric chars with _
 vars_clean <- gsub("[^a-z0-9_]", "_", vars_clean) 
-# collapse multiple underscores
+## collapse multiple underscores
 vars_clean <- gsub("_+", "_", vars_clean) 
-# prefix starting digits with x_
+## prefix starting digits with x_
 vars_clean <- gsub("^([0-9])", "x_\\1", vars_clean) 
 
 vars_clean
 
+```
+
+### Question 6: Factor relevel + model interpretation
+
+Using the built-in `iris` dataset:
+
+1.  Relevel `Species` so that `"virginica"` is the reference level.
+
+2.  Fit a linear model `Sepal.Length ~ Species`.
+
+3.  Show the coefficient table.
+
+4.  Explain, in 3–4 sentences, how changing the reference level changed the interpretation of the model output, and what the sign of the estimates means now.
+
+The answers to the question is below.
+
+When we change the reference level to virginica, the intercept of Sepal.Length’s mean will change from setosa to virginica. The coefficients for setosa and versicolor now measure how much their mean differs from virginica’s mean. A negative estimate would indicate that the species has a shorter average sepal length than virginica, comparatively, a positive estimate would indicate a longer one. This would not change the overall values, only the interpretation of the coefficients.
+
+```{r}
+## Load the iris dataset (built-in)
+data(iris)
+
+## 1. Relevel Species so that "virginica" is the reference
+iris$Species <- relevel(iris$Species, ref = "virginica")
+
+## 2. Fit the linear model
+model <- lm(Sepal.Length ~ Species, data = iris)
+
+## 3. Show the coefficient table
+summary(model)$coefficients
+
+```
+
+### Question 7: Operating on a list of data frames
+
+```         
+df1 <- mtcars[1:10, c("mpg", "hp")] df2 <- mtcars[11:20, c("mpg", "hp")] df3 <- mtcars[21:32, c("mpg", "hp")] dfs <- list(df1, df2, df3)
+```
+
+**Tasks:**
+
+1.  Using `lapply`, compute the mean of `mpg` for each data frame.
+
+2.  Combine the results into a single numeric vector.
+
+3.  Now write **one** line of R code that returns the **overall** mean of `mpg` across **all rows of all list elements** (i.e. not the mean of means, but the mean of the combined data).
+
+4.  Explain in 2–3 sentences what `do.call(rbind, ...)` does and why it is useful here.
+
+The answers to the question is below.
+
+do.call(rbind,...) takes a list of data frames and stacks their rows into a single data frame. It’s useful here because it lets you merge all the mpg rows from different data frames into one continuous data frame. This allows you to calculate the overall mean directly, without having to unlist first or do looping manually. In essence, it condenses the list structure into a single table making it easier for analysis.
+
+```{r}
+df1 <- mtcars[1:10, c("mpg", "hp")]
+df2 <- mtcars[11:20, c("mpg", "hp")]
+df3 <- mtcars[21:32, c("mpg", "hp")]
+dfs <- list(df1, df2, df3)
+
+##compuste the mean of mpg for each df using lapply
+mean_mpg_list <- lapply(dfs, function(df) mean(df$mpg))
+mean_mpg_list
+##combine results into a single vector
+mean_mpg_vector <- unlist(mean_mpg_list)
+mean_mpg_vector
+##compute overall mean
+mean(unlist(lapply(dfs, '[[', "mpg")))
+
+```
+
+### Question 8: Matrix vs data frame behavior
+
+1.  Convert this matrix to a data frame and add a fifth column which is a factor with levels `"low"`, `"high"`.
+
+2.  Show (with code) that arithmetic on the matrix and arithmetic on the converted data frame behave differently if non-numeric columns are present.
+
+3.  In 3–4 sentences, explain why matrices must be homogeneous and data frames can be heterogeneous, and what that implies for statistical modelling.
+
+The answers to the question is below.
+
+Matrices in R must be homogeneous, meaning all the data they contain is of the same type, usually numeric. This ensures that mathematical operations are always well defined and can be applied to the entire matrix at once. In contrast, data frames are heterogeneous, meaning they can store multiple types of data (such as numeric and character) within the same structure. For statistical modelling, this is important because real datasets often include both numerical variables and categorical (factor) variables, which can be used together in regression or ANOVA models; matrices cannot do this directly without converting data types.
+
+```{r}
+m <- matrix(1:12, nrow = 3, byrow = TRUE)
+colnames(m) <- c("A", "B", "C", "D")
+
+##convert to data frame
+df <- as.data.frame(m)
+
+## add a factor column
+df$Level <- factor(c("low","high","low"), levels = c("low","high"))
+df
+
+```
+
+### Question 9: Power analysis with a different function
+
+1.  Load `{pwr}` (assume installed).
+
+2.  Use `?pwr.anova.test` to determine which arguments control the number of groups and the effect size.
+
+3.  Write code to compute the required sample size for a one-way ANOVA with:
+
+    -   4 groups
+
+    -   effect size f = 0.25
+
+    -   power = 0.8
+
+    -   sig.level = 0.05
+
+4.  In 2–3 sentences, explain how `f` in ANOVA differs conceptually from Cohen’s `d` in a t-test.
+
+The answer to the question is below.
+
+At a conceptual level Cohen’s d in a t-test tells you the difference between two groups only. This is contrasted by how Cohen’s f in ANOVA tells you how much variation there is in the outcome (of an ANOVA test) by explaining the differences between groups relative to the within group variance, across all groups involved. In essence, Cohen’s d in t-test is a difference between the means of a pair whereas Cohen’s f in ANOVA is the overall variance explained.
+
+```{r}
+# Load the pwr package
+library(pwr)
+
+
+## Power analysis for one-way ANOVA
+anova_power <- pwr.anova.test(
+ ## number of groups
+   k = 4,  
+ ## effect size (Cohen's f)
+  f = 0.25,       
+ ## desired power
+ power = 0.8,   
+  sig.level = 0.05
+)
+
+## Display the result
+anova_power
+```
+
+### Question 10: Authoring and indexing a deeper unnamed list
+
+Construct a **three-level unnamed list** like this:
+
+-   level 1: a list of length 2
+
+-   level 2: each element is itself a list
+
+-   level 3: at least one of those contains a numeric vector of length ≥ 3
+
+**Tasks:**
+
+1.  Write the R code to build such a list with no names anywhere.
+
+2.  Using **only** numeric indexing (`[[ ]]`), extract the **third** element of the deepest numeric vector.
+
+3.  Store it as a scalar.
+
+4.  In 3–4 sentences, explain the difference between `[` and `[[` for lists and why only one of them gives you the actual element.
+
+The answer to the question is below.
+
+The difference between \[ \] and \[\[ \]\] comes down to what they return. \[ \] returns a subset of the original object, which is still a list even if you select only a single element. In contrast, \[\[ \]\] extracts and returns the raw data itself. Because I want to reach a numeric value and store it as a scalar, using \[ \] would give me a list instead of a number, so only \[\[ \]\] works here.
+
+```{r}
+## Construct a three-level unnamed list
+x <- list(
+  ## numeric vector (length ≥ 3)
+  list(c(4, 7, 9, 12)),  
+  list(c(1, 2))
+)
+
+## Extract the third element of the deepest numeric vector
+result <- x[[1]][[1]][[3]]
+##store as a scalar
+scalar_value <- x[[1]][[1]][[3]]
+
+## Show the scalar
+result
 ```
