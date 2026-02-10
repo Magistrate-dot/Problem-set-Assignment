@@ -7,7 +7,15 @@ editor: visual
 
 ### Question 1 : You are given two objects that are meant to be merged and then plotted, but the join key is misspelled and the plot is using the wrong column.
 
-When doing a Merge(), by.x and by.y are used by R which column name to use as the key. For example by.x will tell R which column name to use as the key form the first data frame, and by.y tells it which column to use from the second data frame. This is useful when combining data held within two different columns with different names. If you do not use by.x and by.y when doing a merge() it will assume the key columns have the same name in both data frames.
+The first change I made was adding a column containing the car names to the data frame `df_cars`. This makes the merge operation clearer and safer by explicitly defining the matching key as a variable, which reduces the risk of data being lost or mislabelled during data manipulation. It should be noted that the code can still work without adding `df_cars$carname <- rownames(mtcars)`, but including it improves clarity and robustness.
+
+The next change involved fixing the merge key so that both data frames were merged using the correct and consistent column name. This ensures that each car is matched correctly between the two data frames.
+
+I then addressed variable naming by consistently using a single variable name, `cyl_group`. This helps prevent errors during plotting and makes the code easier to read and maintain.
+
+The next change was converting `merged$cyl_group` into a factor rather than leaving it as a character variable. Treating it as a factor allows R to handle it as a categorical variable, which makes the colour mapping in the plot more reliable.
+
+The final changes were made to the plot and legend. First, I corrected the column name used for colouring the points so that it matched the data frame. Second, in the legend, I assigned colours using numeric indices that correspond to the factor levels, ensuring that the legend colours correctly match those used in the plot.
 
 ```{r}
 df_cars <- mtcars
@@ -23,7 +31,7 @@ df_labels <- data.frame(
 
 ##merge the two data frames using car names as the matching key.
 merged <- merge(df_cars, df_labels, by.x = "row.names", by.y = "carname")
-##Conver cyl_group into a factor
+##Convert cyl_group into a factor
 merged$cyl_group <- factor(merged$cyl_group)
 ##create scatter plot, colour plots.
 plot(merged$hp, merged$mpg,
@@ -37,9 +45,11 @@ legend("topright", legend = unique(merged$cyl_group), pch = 19,
        col = seq_along(unique(merged$cyl_group)))
 ```
 
+When doing a Merge(), by.x and by.y are used by R which column name to use as the key. For example by.x will tell R which column name to use as the key form the first data frame, and by.y tells it which column to use from the second data frame. This is useful when combining data held within two different columns with different names. If you do not use by.x and by.y when doing a merge() it will assume the key columns have the same name in both data frames.
+
 ### Question 2: Wide to long and grouped summaries
 
-Long format tends to be easier to plot and analyse because the information it stores is held within columns and observations are stored in rows, this matches the trend of how most plotting and modelling functions assume the data is structured. This makes it straightforward to map variables to aesthetics (x, y, colour) and to apply grouped summaries or statistical models. In brief, Whereas wide first is good for data entry, long format is better for analysis, modeling and summaries.
+The way I tackled this quesztion was to explicitly tell R which columns represented repeated measurements of the same variable of diffent years, and to map those columns to a meaningful year value. by using "varying, v.names, and times, I can avoid relying on implicit column order make the transformation clear and reproducible. this creates a long-format data set where each row is a single observation.
 
 ```{r}
 set.seed(42)
@@ -69,9 +79,11 @@ aggregate(value ~ year, data = df_long, FUN = mean)
 
 ```
 
+Long format tends to be easier to plot and analyse because the information it stores is held within columns and observations are stored in rows, this matches the trend of how most plotting and modelling functions assume the data is structured. This makes it straightforward to map variables to aesthetics (x, y, colour) and to apply grouped summaries or statistical models. In brief, Whereas wide first is good for data entry, long format is better for analysis, modeling and summaries.
+
 ### Question 3 : Controlled randomness and NA handling
 
-One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median) it creates an artificial spike at that value, this causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results, and change the outcomes of hypothesis tests.
+The way I approached the coding section of this question is by first showing that mean(x) returns NA to confirm that there is missing data. Then I moved onto replacing the the NA's with the median of non-missing values, "is.na(x)" identifies missing positions then "median(x,na.rm = TRUE)" ensures that only the observed values are computed. This results in only the missing values are replaced.I ended it with the mean(x) to show it no longer returned any NA's.
 
 ```{r}
 ##set.seed(123) guarentees that the random number generation in R
@@ -88,9 +100,11 @@ x[is.na(x)] <- median(x, na.rm = TRUE)
 mean(x)
 ```
 
+One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median) it creates an artificial spike at that value, this causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results, and change the outcomes of hypothesis tests.
+
 ### Question 4 : Writing a small, flexible summary function
 
-Using \[\[ inside of a function is safer than \$ for a couple of reasons. The first is due to how it is designed for programmatic access and how it can reliably work with column names stored as character strings. On the other hand, \$ only works with literal names however it can perform partial matching, but this can silently return NULL if a column is missing causing bugs to be harder to detect.
+I approached this question by first writing a function that confirms it's inputs then checks if the object is a data frame, checks that the requested column exists, and that all specified columns are numeric.I then used these columns names to compute sample size,mean and standard deviation for each variable while handling missing values.
 
 ```{r}
 ## Define the function
@@ -127,9 +141,11 @@ my_summary <- function(df, cols) {
 my_summary(mtcars, c("mpg", "hp", "wt")) 
 ```
 
+Using \[\[ inside of a function is safer than \$ for a couple of reasons. The first is due to how it is designed for programmatic access and how it can reliably work with column names stored as character strings. On the other hand, \$ only works with literal names however it can perform partial matching, but this can silently return NULL if a column is missing causing bugs to be harder to detect.
+
 ### Question 5: Regular expressions for variable name cleaning
 
-The regex that I chose to use was a character class (\[, (). %\]) to target only the specified punctuation and replace them with underscores. I have used the broader class \[\^  a - z 0-9\_\] to make any non-alphanumeric characters normalised safely without messing with the underscores already there. The pattern “\_+” collapses runs of underscores created by multiple substitutions into a single underscore, this is to avoid messy names. Finally, I have used \^ (\[0-9\]) to check the start of the string so only the first digits are prefixed with “x\_”, leaving the internal numbers alone.
+The way I tried to approach this question was to essencually meet each specification slowly but surely, by tageting the spaces, making sure everything is lower case, punctuation, and ending it by making multiple underscores are collapsed into a single one and that names do not start with a digit. (I explain the regex choice underneath the code)
 
 ```{r}
 vars <- c("  temp.C ", "RH(%)", "soil-moisture", "2nd_reading", "sensor.ID")
@@ -152,9 +168,11 @@ vars_clean
 
 ```
 
+The regex that I chose to use was a character class (\[, (). %\]) to target only the specified punctuation and replace them with underscores. I have used the broader class \[\^  a - z 0-9\_\] to make any non-alphanumeric characters normalised safely without messing with the underscores already there. The pattern “\_+” collapses runs of underscores created by multiple substitutions into a single underscore, this is to avoid messy names. Finally, I have used \^ (\[0-9\]) to check the start of the string so only the first digits are prefixed with “x\_”, leaving the internal numbers alone.
+
 ### Question 6: Factor relevel + model interpretation
 
-When we change the reference level to virginica, the intercept of Sepal.Length’s mean will change from setosa to virginica. The coefficients for setosa and versicolor now measure how much their mean differs from virginica’s mean. A negative estimate would indicate that the species has a shorter average sepal length than virginica, comparatively, a positive estimate would indicate a longer one. This would not change the overall values, only the interpretation of the coefficients.
+After loading in the iris data set, I then moved onto making virginica is the reference level. Next was to fitting the linear model using the sepal length and species.Finally I created a summary showing the coefficient table.
 
 ```{r}
 ## Load the iris dataset (built-in)
@@ -171,9 +189,11 @@ summary(model)$coefficients
 
 ```
 
+When we change the reference level to virginica, the intercept of Sepal.Length’s mean will change from setosa to virginica. The coefficients for setosa and versicolor now measure how much their mean differs from virginica’s mean. A negative estimate would indicate that the species has a shorter average sepal length than virginica, comparatively, a positive estimate would indicate a longer one. This would not change the overall values, only the interpretation of the coefficients.
+
 ### Question 7: Operating on a list of data frames
 
-do.call(rbind,...) takes a list of data frames and stacks their rows into a single data frame. It’s useful here because it lets you merge all the mpg rows from different data frames into one continuous data frame. This allows you to calculate the overall mean directly, without having to unlist first or do looping manually. In essence, it condenses the list structure into a single table making it easier for analysis.
+First I used lapply to return a list of means, then I used unnlist() to force the list from lapply into a numeric vector.this is to say I used unlist() to combine the results. Finally, I extracted and combined all the mpg values across the data frames before calculating the overall means.
 
 ```{r}
 df1 <- mtcars[1:10, c("mpg", "hp")]
@@ -181,7 +201,7 @@ df2 <- mtcars[11:20, c("mpg", "hp")]
 df3 <- mtcars[21:32, c("mpg", "hp")]
 dfs <- list(df1, df2, df3)
 
-##compuste the mean of mpg for each df using lapply
+##compute the mean of mpg for each df using lapply
 mean_mpg_list <- lapply(dfs, function(df) mean(df$mpg))
 mean_mpg_list
 ##combine results into a single vector
@@ -192,13 +212,20 @@ mean(unlist(lapply(dfs, '[[', "mpg")))
 
 ```
 
+do.call(rbind,...) takes a list of data frames and stacks their rows into a single data frame. It’s useful here because it lets you merge all the mpg rows from different data frames into one continuous data frame. This allows you to calculate the overall mean directly, without having to unlist first or do looping manually. In essence, it condenses the list structure into a single table making it easier for analysis.
+
 ### Question 8: Matrix vs data frame behavior
 
-Matrices in R must be homogeneous, meaning all the data they contain is of the same type, usually numeric. This ensures that mathematical operations are always well defined and can be applied to the entire matrix at once. In contrast, data frames are heterogeneous, meaning they can store multiple types of data (such as numeric and character) within the same structure. For statistical modelling, this is important because real datasets often include both numerical variables and categorical (factor) variables, which can be used together in regression or ANOVA models; matrices cannot do this directly without converting data types.
+I started this question by showing the matrix first then demonstrated that arithmetic on a numeric matrix works as they are all numeric. I then converted the matrix into a data frame and added a fctor column. I attempted to do an multiply the data frame by 2 however due to the data frame now containing a non-numeric column this failed. to show that I could still do an arithmetic I used a subset of data within the data frame only using the numeric columns.
 
 ```{r}
 m <- matrix(1:12, nrow = 3, byrow = TRUE)
 colnames(m) <- c("A", "B", "C", "D")
+
+##view the matrix
+m
+##matrix arimetic
+m*2
 
 ##convert to data frame
 df <- as.data.frame(m)
@@ -207,14 +234,22 @@ df <- as.data.frame(m)
 df$Level <- factor(c("low","high","low"), levels = c("low","high"))
 df
 
+##attempt arithetic on the full data frame
+df*2
+
+##perform arithetic only on numeric columns
+df_numeric <- df[,1:4]
+df_numeric * 2
 ```
+
+Matrices in R must be homogeneous, meaning all the data they contain is of the same type, usually numeric. This ensures that mathematical operations are always well defined and can be applied to the entire matrix at once. In contrast, data frames are heterogeneous, meaning they can store multiple types of data (such as numeric and character) within the same structure. For statistical modelling, this is important because real datasets often include both numerical variables and categorical (factor) variables, which can be used together in regression or ANOVA models; matrices cannot do this directly without converting data types.
 
 ### Question 9: Power analysis with a different function
 
-At a conceptual level Cohen’s d in a t-test tells you the difference between two groups only. This is contrasted by how Cohen’s f in ANOVA tells you how much variation there is in the outcome (of an ANOVA test) by explaining the differences between groups relative to the within group variance, across all groups involved. In essence, Cohen’s d in t-test is a difference between the means of a pair whereas Cohen’s f in ANOVA is the overall variance explained.
+Following the instruction to load the pwr package, I proceeded to set the number of groups (k). effect size (f), desired power, and significant level. this was to allow me to compute the required sample size for a one-way ANOVA. Finally I displayed the result.
 
 ```{r}
-# Load the pwr package
+## Load the pwr package
 library(pwr)
 
 
@@ -233,9 +268,11 @@ anova_power <- pwr.anova.test(
 anova_power
 ```
 
+At a conceptual level Cohen’s d in a t-test tells you the difference between two groups only. This is contrasted by how Cohen’s f in ANOVA tells you how much variation there is in the outcome (of an ANOVA test) by explaining the differences between groups relative to the within group variance, across all groups involved. In essence, Cohen’s d in t-test is a difference between the means of a pair whereas Cohen’s f in ANOVA is the overall variance explained.
+
 ### Question 10: Authoring and indexing a deeper unnamed list
 
-The difference between \[ \] and \[\[ \]\] comes down to what they return. \[ \] returns a subset of the original object, which is still a list even if you select only a single element. In contrast, \[\[ \]\] extracts and returns the raw data itself. Because I want to reach a numeric value and store it as a scalar, using \[ \] would give me a list instead of a number, so only \[\[ \]\] works here.
+The way I went about creating the three-level unnamed list is by first defining x as a list with a length of 2, where each element is itself a list. One of the nested lists has a numeric vector length of at least 3. From here I used numeric indexing \[\[ \]\] to access the third element of that numeric vector and store it as a scalar. Finally, I showed the scalar result.
 
 ```{r}
 ## Construct a three-level unnamed list
@@ -253,3 +290,5 @@ scalar_value <- x[[1]][[1]][[3]]
 ## Show the scalar
 result
 ```
+
+The difference between \[ \] and \[\[ \]\] comes down to what they return. \[ \] returns a subset of the original object, which is still a list even if you select only a single element. In contrast, \[\[ \]\] extracts and returns the raw data itself. Because I want to reach a numeric value and store it as a scalar, using \[ \] would give me a list instead of a number, so only \[\[ \]\] works here.
