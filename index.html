@@ -108,7 +108,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="question-1-you-are-given-two-objects-that-are-meant-to-be-merged-and-then-plotted-but-the-join-key-is-misspelled-and-the-plot-is-using-the-wrong-column." class="level3">
 <h3 class="anchored" data-anchor-id="question-1-you-are-given-two-objects-that-are-meant-to-be-merged-and-then-plotted-but-the-join-key-is-misspelled-and-the-plot-is-using-the-wrong-column.">Question 1 : You are given two objects that are meant to be merged and then plotted, but the join key is misspelled and the plot is using the wrong column.</h3>
-<p>When doing a Merge(), by.x and by.y are used by R which column name to use as the key. For example by.x will tell R which column name to use as the key form the first data frame, and by.y tells it which column to use from the second data frame. This is useful when combining data held within two different columns with different names. If you do not use by.x and by.y when doing a merge() it will assume the key columns have the same name in both data frames.</p>
+<p>The first change I made was adding a column containing the car names to the data frame <code>df_cars</code>. This makes the merge operation clearer and safer by explicitly defining the matching key as a variable, which reduces the risk of data being lost or mislabelled during data manipulation. It should be noted that the code can still work without adding <code>df_cars$carname &lt;- rownames(mtcars)</code>, but including it improves clarity and robustness.</p>
+<p>The next change involved fixing the merge key so that both data frames were merged using the correct and consistent column name. This ensures that each car is matched correctly between the two data frames.</p>
+<p>I then addressed variable naming by consistently using a single variable name, <code>cyl_group</code>. This helps prevent errors during plotting and makes the code easier to read and maintain.</p>
+<p>The next change was converting <code>merged$cyl_group</code> into a factor rather than leaving it as a character variable. Treating it as a factor allows R to handle it as a categorical variable, which makes the colour mapping in the plot more reliable.</p>
+<p>The final changes were made to the plot and legend. First, I corrected the column name used for colouring the points so that it matched the data frame. Second, in the legend, I assigned colours using numeric indices that correspond to the factor levels, ensuring that the legend colours correctly match those used in the plot.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>df_cars <span class="ot">&lt;-</span> mtcars</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="do">##add a new column containing the car names.</span></span>
@@ -123,7 +127,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">##merge the two data frames using car names as the matching key.</span></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>merged <span class="ot">&lt;-</span> <span class="fu">merge</span>(df_cars, df_labels, <span class="at">by.x =</span> <span class="st">"row.names"</span>, <span class="at">by.y =</span> <span class="st">"carname"</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">##Conver cyl_group into a factor</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">##Convert cyl_group into a factor</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>merged<span class="sc">$</span>cyl_group <span class="ot">&lt;-</span> <span class="fu">factor</span>(merged<span class="sc">$</span>cyl_group)</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">##create scatter plot, colour plots.</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(merged<span class="sc">$</span>hp, merged<span class="sc">$</span>mpg,</span>
@@ -143,10 +147,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<p>When doing a Merge(), by.x and by.y are used by R which column name to use as the key. For example by.x will tell R which column name to use as the key form the first data frame, and by.y tells it which column to use from the second data frame. This is useful when combining data held within two different columns with different names. If you do not use by.x and by.y when doing a merge() it will assume the key columns have the same name in both data frames.</p>
 </section>
 <section id="question-2-wide-to-long-and-grouped-summaries" class="level3">
 <h3 class="anchored" data-anchor-id="question-2-wide-to-long-and-grouped-summaries">Question 2: Wide to long and grouped summaries</h3>
-<p>Long format tends to be easier to plot and analyse because the information it stores is held within columns and observations are stored in rows, this matches the trend of how most plotting and modelling functions assume the data is structured. This makes it straightforward to map variables to aesthetics (x, y, colour) and to apply grouped summaries or statistical models. In brief, Whereas wide first is good for data entry, long format is better for analysis, modeling and summaries.</p>
+<p>The way I tackled this quesztion was to explicitly tell R which columns represented repeated measurements of the same variable of diffent years, and to map those columns to a meaningful year value. by using “varying, v.names, and times, I can avoid relying on implicit column order make the transformation clear and reproducible. this creates a long-format data set where each row is a single observation.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_wide <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
@@ -196,10 +201,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 3 2022 12.35811</code></pre>
 </div>
 </div>
+<p>Long format tends to be easier to plot and analyse because the information it stores is held within columns and observations are stored in rows, this matches the trend of how most plotting and modelling functions assume the data is structured. This makes it straightforward to map variables to aesthetics (x, y, colour) and to apply grouped summaries or statistical models. In brief, Whereas wide first is good for data entry, long format is better for analysis, modeling and summaries.</p>
 </section>
 <section id="question-3-controlled-randomness-and-na-handling" class="level3">
 <h3 class="anchored" data-anchor-id="question-3-controlled-randomness-and-na-handling">Question 3 : Controlled randomness and NA handling</h3>
-<p>One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median) it creates an artificial spike at that value, this causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results, and change the outcomes of hypothesis tests.</p>
+<p>The way I approached the coding section of this question is by first showing that mean(x) returns NA to confirm that there is missing data. Then I moved onto replacing the the NA’s with the median of non-missing values, “is.na(x)” identifies missing positions then “median(x,na.rm = TRUE)” ensures that only the observed values are computed. This results in only the missing values are replaced.I ended it with the mean(x) to show it no longer returned any NA’s.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">##set.seed(123) guarentees that the random number generation in R</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="do">## is repeatable and predictable for debugging,research, etc.</span><span class="al">###</span></span>
@@ -220,10 +226,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] 5.345223</code></pre>
 </div>
 </div>
+<p>One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median) it creates an artificial spike at that value, this causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results, and change the outcomes of hypothesis tests.</p>
 </section>
 <section id="question-4-writing-a-small-flexible-summary-function" class="level3">
 <h3 class="anchored" data-anchor-id="question-4-writing-a-small-flexible-summary-function">Question 4 : Writing a small, flexible summary function</h3>
-<p>Using [[ inside of a function is safer than $ for a couple of reasons. The first is due to how it is designed for programmatic access and how it can reliably work with column names stored as character strings. On the other hand, $ only works with literal names however it can perform partial matching, but this can silently return NULL if a column is missing causing bugs to be harder to detect.</p>
+<p>I approached this question by first writing a function that confirms it’s inputs then checks if the object is a data frame, checks that the requested column exists, and that all specified columns are numeric.I then used these columns names to compute sample size,mean and standard deviation for each variable while handling missing values.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Define the function</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>my_summary <span class="ot">&lt;-</span> <span class="cf">function</span>(df, cols) {</span>
@@ -264,10 +271,11 @@ hp  32 146.68750 68.5628685
 wt  32   3.21725  0.9784574</code></pre>
 </div>
 </div>
+<p>Using [[ inside of a function is safer than $ for a couple of reasons. The first is due to how it is designed for programmatic access and how it can reliably work with column names stored as character strings. On the other hand, $ only works with literal names however it can perform partial matching, but this can silently return NULL if a column is missing causing bugs to be harder to detect.</p>
 </section>
 <section id="question-5-regular-expressions-for-variable-name-cleaning" class="level3">
 <h3 class="anchored" data-anchor-id="question-5-regular-expressions-for-variable-name-cleaning">Question 5: Regular expressions for variable name cleaning</h3>
-<p>The regex that I chose to use was a character class ([, (). %]) to target only the specified punctuation and replace them with underscores. I have used the broader class [^&nbsp; a - z 0-9_] to make any non-alphanumeric characters normalised safely without messing with the underscores already there. The pattern “_+” collapses runs of underscores created by multiple substitutions into a single underscore, this is to avoid messy names. Finally, I have used ^ ([0-9]) to check the start of the string so only the first digits are prefixed with “x_”, leaving the internal numbers alone.</p>
+<p>The way I tried to approach this question was to essencually meet each specification slowly but surely, by tageting the spaces, making sure everything is lower case, punctuation, and ending it by making multiple underscores are collapsed into a single one and that names do not start with a digit. (I explain the regex choice underneath the code)</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"  temp.C "</span>, <span class="st">"RH(%)"</span>, <span class="st">"soil-moisture"</span>, <span class="st">"2nd_reading"</span>, <span class="st">"sensor.ID"</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -291,10 +299,11 @@ wt  32   3.21725  0.9784574</code></pre>
 [5] "sensor_id"    </code></pre>
 </div>
 </div>
+<p>The regex that I chose to use was a character class ([, (). %]) to target only the specified punctuation and replace them with underscores. I have used the broader class [^&nbsp; a - z 0-9_] to make any non-alphanumeric characters normalised safely without messing with the underscores already there. The pattern “_+” collapses runs of underscores created by multiple substitutions into a single underscore, this is to avoid messy names. Finally, I have used ^ ([0-9]) to check the start of the string so only the first digits are prefixed with “x_”, leaving the internal numbers alone.</p>
 </section>
 <section id="question-6-factor-relevel-model-interpretation" class="level3">
 <h3 class="anchored" data-anchor-id="question-6-factor-relevel-model-interpretation">Question 6: Factor relevel + model interpretation</h3>
-<p>When we change the reference level to virginica, the intercept of Sepal.Length’s mean will change from setosa to virginica. The coefficients for setosa and versicolor now measure how much their mean differs from virginica’s mean. A negative estimate would indicate that the species has a shorter average sepal length than virginica, comparatively, a positive estimate would indicate a longer one. This would not change the overall values, only the interpretation of the coefficients.</p>
+<p>After loading in the iris data set, I then moved onto making virginica is the reference level. Next was to fitting the linear model using the sepal length and species.Finally I created a summary showing the coefficient table.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Load the iris dataset (built-in)</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(iris)</span>
@@ -314,17 +323,18 @@ Speciessetosa       -1.582 0.10295789 -15.365506  2.214821e-32
 Speciesversicolor   -0.652 0.10295789  -6.332686  2.765638e-09</code></pre>
 </div>
 </div>
+<p>When we change the reference level to virginica, the intercept of Sepal.Length’s mean will change from setosa to virginica. The coefficients for setosa and versicolor now measure how much their mean differs from virginica’s mean. A negative estimate would indicate that the species has a shorter average sepal length than virginica, comparatively, a positive estimate would indicate a longer one. This would not change the overall values, only the interpretation of the coefficients.</p>
 </section>
 <section id="question-7-operating-on-a-list-of-data-frames" class="level3">
 <h3 class="anchored" data-anchor-id="question-7-operating-on-a-list-of-data-frames">Question 7: Operating on a list of data frames</h3>
-<p>do.call(rbind,…) takes a list of data frames and stacks their rows into a single data frame. It’s useful here because it lets you merge all the mpg rows from different data frames into one continuous data frame. This allows you to calculate the overall mean directly, without having to unlist first or do looping manually. In essence, it condenses the list structure into a single table making it easier for analysis.</p>
+<p>First I used lapply to return a list of means, then I used unnlist() to force the list from lapply into a numeric vector.this is to say I used unlist() to combine the results. Finally, I extracted and combined all the mpg values across the data frames before calculating the overall means.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> mtcars[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="fu">c</span>(<span class="st">"mpg"</span>, <span class="st">"hp"</span>)]</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> mtcars[<span class="dv">11</span><span class="sc">:</span><span class="dv">20</span>, <span class="fu">c</span>(<span class="st">"mpg"</span>, <span class="st">"hp"</span>)]</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>df3 <span class="ot">&lt;-</span> mtcars[<span class="dv">21</span><span class="sc">:</span><span class="dv">32</span>, <span class="fu">c</span>(<span class="st">"mpg"</span>, <span class="st">"hp"</span>)]</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>dfs <span class="ot">&lt;-</span> <span class="fu">list</span>(df1, df2, df3)</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="do">##compuste the mean of mpg for each df using lapply</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="do">##compute the mean of mpg for each df using lapply</span></span>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>mean_mpg_list <span class="ot">&lt;-</span> <span class="fu">lapply</span>(dfs, <span class="cf">function</span>(df) <span class="fu">mean</span>(df<span class="sc">$</span>mpg))</span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>mean_mpg_list</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -349,49 +359,87 @@ Speciesversicolor   -0.652 0.10295789  -6.332686  2.765638e-09</code></pre>
 <pre><code>[1] 20.09062</code></pre>
 </div>
 </div>
+<p>do.call(rbind,…) takes a list of data frames and stacks their rows into a single data frame. It’s useful here because it lets you merge all the mpg rows from different data frames into one continuous data frame. This allows you to calculate the overall mean directly, without having to unlist first or do looping manually. In essence, it condenses the list structure into a single table making it easier for analysis.</p>
 </section>
 <section id="question-8-matrix-vs-data-frame-behavior" class="level3">
 <h3 class="anchored" data-anchor-id="question-8-matrix-vs-data-frame-behavior">Question 8: Matrix vs data frame behavior</h3>
-<p>Matrices in R must be homogeneous, meaning all the data they contain is of the same type, usually numeric. This ensures that mathematical operations are always well defined and can be applied to the entire matrix at once. In contrast, data frames are heterogeneous, meaning they can store multiple types of data (such as numeric and character) within the same structure. For statistical modelling, this is important because real datasets often include both numerical variables and categorical (factor) variables, which can be used together in regression or ANOVA models; matrices cannot do this directly without converting data types.</p>
+<p>I started this question by showing the matrix first then demonstrated that arithmetic on a numeric matrix works as they are all numeric. I then converted the matrix into a data frame and added a fctor column. I attempted to do an multiply the data frame by 2 however due to the data frame now containing a non-numeric column this failed. to show that I could still do an arithmetic I used a subset of data within the data frame only using the numeric columns.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(m) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"D"</span>)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="do">##convert to data frame</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(m)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="do">## add a factor column</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>Level <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"low"</span>,<span class="st">"high"</span>,<span class="st">"low"</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"low"</span>,<span class="st">"high"</span>))</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="do">##view the matrix</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     A  B  C  D
+[1,] 1  2  3  4
+[2,] 5  6  7  8
+[3,] 9 10 11 12</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="do">##matrix arimetic</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>m<span class="sc">*</span><span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      A  B  C  D
+[1,]  2  4  6  8
+[2,] 10 12 14 16
+[3,] 18 20 22 24</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="do">##convert to data frame</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(m)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="do">## add a factor column</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>Level <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"low"</span>,<span class="st">"high"</span>,<span class="st">"low"</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"low"</span>,<span class="st">"high"</span>))</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  A  B  C  D Level
 1 1  2  3  4   low
 2 5  6  7  8  high
 3 9 10 11 12   low</code></pre>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="do">##attempt arithetic on the full data frame</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>df<span class="sc">*</span><span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in Ops.factor(left, right): '*' not meaningful for factors</code></pre>
 </div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   A  B  C  D Level
+1  2  4  6  8    NA
+2 10 12 14 16    NA
+3 18 20 22 24    NA</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="do">##perform arithetic only on numeric columns</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>df_numeric <span class="ot">&lt;-</span> df[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>df_numeric <span class="sc">*</span> <span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   A  B  C  D
+1  2  4  6  8
+2 10 12 14 16
+3 18 20 22 24</code></pre>
+</div>
+</div>
+<p>Matrices in R must be homogeneous, meaning all the data they contain is of the same type, usually numeric. This ensures that mathematical operations are always well defined and can be applied to the entire matrix at once. In contrast, data frames are heterogeneous, meaning they can store multiple types of data (such as numeric and character) within the same structure. For statistical modelling, this is important because real datasets often include both numerical variables and categorical (factor) variables, which can be used together in regression or ANOVA models; matrices cannot do this directly without converting data types.</p>
 </section>
 <section id="question-9-power-analysis-with-a-different-function" class="level3">
 <h3 class="anchored" data-anchor-id="question-9-power-analysis-with-a-different-function">Question 9: Power analysis with a different function</h3>
-<p>At a conceptual level Cohen’s d in a t-test tells you the difference between two groups only. This is contrasted by how Cohen’s f in ANOVA tells you how much variation there is in the outcome (of an ANOVA test) by explaining the differences between groups relative to the within group variance, across all groups involved. In essence, Cohen’s d in t-test is a difference between the means of a pair whereas Cohen’s f in ANOVA is the overall variance explained.</p>
+<p>Following the instruction to load the pwr package, I proceeded to set the number of groups (k). effect size (f), desired power, and significant level. this was to allow me to compute the required sample size for a one-way ANOVA. Finally I displayed the result.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the pwr package</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pwr)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Power analysis for one-way ANOVA</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>anova_power <span class="ot">&lt;-</span> <span class="fu">pwr.anova.test</span>(</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a> <span class="do">## number of groups</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>   <span class="at">k =</span> <span class="dv">4</span>,  </span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a> <span class="do">## effect size (Cohen's f)</span></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">f =</span> <span class="fl">0.25</span>,       </span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a> <span class="do">## desired power</span></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a> <span class="at">power =</span> <span class="fl">0.8</span>,   </span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">sig.level =</span> <span class="fl">0.05</span></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="do">## Display the result</span></span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>anova_power</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Load the pwr package</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pwr)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Power analysis for one-way ANOVA</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>anova_power <span class="ot">&lt;-</span> <span class="fu">pwr.anova.test</span>(</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a> <span class="do">## number of groups</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>   <span class="at">k =</span> <span class="dv">4</span>,  </span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a> <span class="do">## effect size (Cohen's f)</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">f =</span> <span class="fl">0.25</span>,       </span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a> <span class="do">## desired power</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a> <span class="at">power =</span> <span class="fl">0.8</span>,   </span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">sig.level =</span> <span class="fl">0.05</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a><span class="do">## Display the result</span></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>anova_power</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
      Balanced one-way analysis of variance power calculation 
@@ -405,29 +453,31 @@ Speciesversicolor   -0.652 0.10295789  -6.332686  2.765638e-09</code></pre>
 NOTE: n is number in each group</code></pre>
 </div>
 </div>
+<p>At a conceptual level Cohen’s d in a t-test tells you the difference between two groups only. This is contrasted by how Cohen’s f in ANOVA tells you how much variation there is in the outcome (of an ANOVA test) by explaining the differences between groups relative to the within group variance, across all groups involved. In essence, Cohen’s d in t-test is a difference between the means of a pair whereas Cohen’s f in ANOVA is the overall variance explained.</p>
 </section>
 <section id="question-10-authoring-and-indexing-a-deeper-unnamed-list" class="level3">
 <h3 class="anchored" data-anchor-id="question-10-authoring-and-indexing-a-deeper-unnamed-list">Question 10: Authoring and indexing a deeper unnamed list</h3>
-<p>The difference between [ ] and [[ ]] comes down to what they return. [ ] returns a subset of the original object, which is still a list even if you select only a single element. In contrast, [[ ]] extracts and returns the raw data itself. Because I want to reach a numeric value and store it as a scalar, using [ ] would give me a list instead of a number, so only [[ ]] works here.</p>
+<p>The way I went about creating the three-level unnamed list is by first defining x as a list with a length of 2, where each element is itself a list. One of the nested lists has a numeric vector length of at least 3. From here I used numeric indexing [[ ]] to access the third element of that numeric vector and store it as a scalar. Finally, I showed the scalar result.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Construct a three-level unnamed list</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="do">## numeric vector (length ≥ 3)</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">12</span>)),  </span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Extract the third element of the deepest numeric vector</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> x[[<span class="dv">1</span>]][[<span class="dv">1</span>]][[<span class="dv">3</span>]]</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="do">##store as a scalar</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>scalar_value <span class="ot">&lt;-</span> x[[<span class="dv">1</span>]][[<span class="dv">1</span>]][[<span class="dv">3</span>]]</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="do">## Show the scalar</span></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Construct a three-level unnamed list</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="do">## numeric vector (length ≥ 3)</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">12</span>)),  </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Extract the third element of the deepest numeric vector</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> x[[<span class="dv">1</span>]][[<span class="dv">1</span>]][[<span class="dv">3</span>]]</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="do">##store as a scalar</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>scalar_value <span class="ot">&lt;-</span> x[[<span class="dv">1</span>]][[<span class="dv">1</span>]][[<span class="dv">3</span>]]</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="do">## Show the scalar</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 9</code></pre>
 </div>
 </div>
+<p>The difference between [ ] and [[ ]] comes down to what they return. [ ] returns a subset of the original object, which is still a list even if you select only a single element. In contrast, [[ ]] extracts and returns the raw data itself. Because I want to reach a numeric value and store it as a scalar, using [ ] would give me a list instead of a number, so only [[ ]] works here.</p>
 </section>
 
 </main>
