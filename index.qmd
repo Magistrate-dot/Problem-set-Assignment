@@ -49,7 +49,7 @@ When doing a Merge(), by.x and by.y are used by R which column name to use as th
 
 ### Question 2: Wide to long and grouped summaries
 
-The way I tackled this quesztion was to explicitly tell R which columns represented repeated measurements of the same variable of diffent years, and to map those columns to a meaningful year value. by using "varying, v.names, and times, I can avoid relying on implicit column order make the transformation clear and reproducible. this creates a long-format data set where each row is a single observation.
+The way I tackled this question was to explicitly tell R which columns represented repeated measurements of the same variable in different years, and to map those columns to a meaningful year value. By using “varying, v.names, and times, I can avoid relying on implicit column order make the transformation clear and reproducible. This creates a long-format data set where each row is a single observation.
 
 ```{r}
 set.seed(42)
@@ -79,11 +79,11 @@ aggregate(value ~ year, data = df_long, FUN = mean)
 
 ```
 
-Long format tends to be easier to plot and analyse because the information it stores is held within columns and observations are stored in rows, this matches the trend of how most plotting and modelling functions assume the data is structured. This makes it straightforward to map variables to aesthetics (x, y, colour) and to apply grouped summaries or statistical models. In brief, Whereas wide first is good for data entry, long format is better for analysis, modeling and summaries.
+Long format tends to be easier to plot and analyse because the information it stores is held within columns, and observations are stored in rows; this matches the trend of how most plotting and modelling functions assume the data is structured. This makes it straightforward to map variables to aesthetics (x, y, colour) and to apply grouped summaries or statistical models. In brief, whereas wide first is good for data entry, long format is better for analysis, modeling and summaries.
 
 ### Question 3 : Controlled randomness and NA handling
 
-The way I approached the coding section of this question is by first showing that mean(x) returns NA to confirm that there is missing data. Then I moved onto replacing the the NA's with the median of non-missing values, "is.na(x)" identifies missing positions then "median(x,na.rm = TRUE)" ensures that only the observed values are computed. This results in only the missing values are replaced.I ended it with the mean(x) to show it no longer returned any NA's.
+The way I approached the coding section of this question is by first showing that mean(x) returns NA to confirm that there is missing data. Then I moved onto replacing the NAs with the median of non-missing values, “is.na(x)” identifies missing positions, then “median(x,na.rm = TRUE)” ensures that only the observed values are computed. This results in only the missing values being replaced. I ended it with the mean(x) to show that it no longer returned any NAs.
 
 ```{r}
 ##set.seed(123) guarentees that the random number generation in R
@@ -100,11 +100,11 @@ x[is.na(x)] <- median(x, na.rm = TRUE)
 mean(x)
 ```
 
-One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median) it creates an artificial spike at that value, this causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results, and change the outcomes of hypothesis tests.
+One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median), it creates an artificial spike at that value. This causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results and change the outcomes of hypothesis tests.
 
 ### Question 4 : Writing a small, flexible summary function
 
-I approached this question by first writing a function that confirms it's inputs then checks if the object is a data frame, checks that the requested column exists, and that all specified columns are numeric.I then used these columns names to compute sample size,mean and standard deviation for each variable while handling missing values.
+I approached this question by first writing a function that confirms its inputs, then checks if the object is a data frame, checks that the requested column exists, and that all specified columns are numeric. I then used these column names to compute sample size, mean and standard deviation for each variable while handling missing values.
 
 ```{r}
 ## Define the function
@@ -141,11 +141,11 @@ my_summary <- function(df, cols) {
 my_summary(mtcars, c("mpg", "hp", "wt")) 
 ```
 
-Using \[\[ inside of a function is safer than \$ for a couple of reasons. The first is due to how it is designed for programmatic access and how it can reliably work with column names stored as character strings. On the other hand, \$ only works with literal names however it can perform partial matching, but this can silently return NULL if a column is missing causing bugs to be harder to detect.
+Using \[\[ inside of a function is safer than \$ for a couple of reasons. The first is due to how it is designed for programmatic access and how it can reliably work with column names stored as character strings. On the other hand, \$ only works with literal names; however, it can perform partial matching, but this can silently return NULL if a column is missing, causing bugs to be harder to detect.
 
 ### Question 5: Regular expressions for variable name cleaning
 
-The way I tried to approach this question was to essencually meet each specification slowly but surely, by tageting the spaces, making sure everything is lower case, punctuation, and ending it by making multiple underscores are collapsed into a single one and that names do not start with a digit. (I explain the regex choice underneath the code)
+The way I tried to approach this question was to essentially meet each specification slowly but surely, by targeting the spaces, making sure everything is lowercase, punctuation, and ending it by collapsing multiple underscores into a single one, and that names do not start with a digit. (I explain the regex choice underneath the code)
 
 ```{r}
 vars <- c("  temp.C ", "RH(%)", "soil-moisture", "2nd_reading", "sensor.ID")
@@ -168,11 +168,11 @@ vars_clean
 
 ```
 
-The regex that I chose to use was a character class (\[, (). %\]) to target only the specified punctuation and replace them with underscores. I have used the broader class \[\^  a - z 0-9\_\] to make any non-alphanumeric characters normalised safely without messing with the underscores already there. The pattern “\_+” collapses runs of underscores created by multiple substitutions into a single underscore, this is to avoid messy names. Finally, I have used \^ (\[0-9\]) to check the start of the string so only the first digits are prefixed with “x\_”, leaving the internal numbers alone.
+The regex that I chose to use was a character class (\[, (). %\]) to target only the specified punctuation and replace them with underscores. I have used the broader class \[\^  a - z 0-9\_\] to make any non-alphanumeric characters normalised safely without messing with the underscores already there. The pattern “*+”* collapses runs of underscores created by multiple substitutions into a single underscore; this is to avoid messy names. Finally, I have used \^ (\[0-9\]) to check the start of the string so only the first digits are prefixed with *“x*”, leaving the internal numbers alone.
 
 ### Question 6: Factor relevel + model interpretation
 
-After loading in the iris data set, I then moved onto making virginica is the reference level. Next was to fitting the linear model using the sepal length and species.Finally I created a summary showing the coefficient table.
+After loading in the iris data set, I then moved on to making virginica the reference level. Next was fitting the linear model using the sepal length and species. Finally, I created a summary showing the coefficient table.
 
 ```{r}
 ## Load the iris dataset (built-in)
@@ -189,11 +189,11 @@ summary(model)$coefficients
 
 ```
 
-When we change the reference level to virginica, the intercept of Sepal.Length’s mean will change from setosa to virginica. The coefficients for setosa and versicolor now measure how much their mean differs from virginica’s mean. A negative estimate would indicate that the species has a shorter average sepal length than virginica, comparatively, a positive estimate would indicate a longer one. This would not change the overall values, only the interpretation of the coefficients.
+When we change the reference level to virginica, the intercept of Sepal.Length’s mean will change from setosa to virginica. The coefficients for setosa and versicolor now measure how much their mean differs from virginica’s mean. A negative estimate would indicate that the species has a shorter average sepal length than virginica; comparatively, a positive estimate would indicate a longer one. This would not change the overall values, only the interpretation of the coefficients.
 
 ### Question 7: Operating on a list of data frames
 
-First I used lapply to return a list of means, then I used unnlist() to force the list from lapply into a numeric vector.this is to say I used unlist() to combine the results. Finally, I extracted and combined all the mpg values across the data frames before calculating the overall means.
+First, I used lapply to return a list of means, then I used unnlist() to force the list from lapply into a numeric vector. This is to say, I used unlist() to combine the results. Finally, I extracted and combined all the mpg values across the data frames before calculating the overall means.
 
 ```{r}
 df1 <- mtcars[1:10, c("mpg", "hp")]
@@ -212,11 +212,11 @@ mean(unlist(lapply(dfs, '[[', "mpg")))
 
 ```
 
-do.call(rbind,...) takes a list of data frames and stacks their rows into a single data frame. It’s useful here because it lets you merge all the mpg rows from different data frames into one continuous data frame. This allows you to calculate the overall mean directly, without having to unlist first or do looping manually. In essence, it condenses the list structure into a single table making it easier for analysis.
+do.call(rbind,…) takes a list of data frames and stacks their rows into a single data frame. It’s useful here because it lets you merge all the mpg rows from different data frames into one continuous data frame. This allows you to calculate the overall mean directly, without having to unlist first or do looping manually. In essence, it condenses the list structure into a single table, making it easier for analysis.
 
 ### Question 8: Matrix vs data frame behavior
 
-I started this question by showing the matrix first then demonstrated that arithmetic on a numeric matrix works as they are all numeric. I then converted the matrix into a data frame and added a fctor column. I attempted to do an multiply the data frame by 2 however due to the data frame now containing a non-numeric column this failed. to show that I could still do an arithmetic I used a subset of data within the data frame only using the numeric columns.
+I started this question by showing the matrix first, then demonstrated that arithmetic on a numeric matrix works as they are all numeric. I then converted the matrix into a data frame and added a factor column. I attempted to multiply the data frame by 2; however, due to the data frame now containing a non-numeric column, this failed. To show that I could still do arithmetic, I used a subset of data within the data frame, only using the numeric columns.
 
 ```{r}
 m <- matrix(1:12, nrow = 3, byrow = TRUE)
@@ -246,7 +246,7 @@ Matrices in R must be homogeneous, meaning all the data they contain is of the s
 
 ### Question 9: Power analysis with a different function
 
-Following the instruction to load the pwr package, I proceeded to set the number of groups (k). effect size (f), desired power, and significant level. this was to allow me to compute the required sample size for a one-way ANOVA. Finally I displayed the result.
+Following the instruction to load the pwr package, I proceeded to set the number of groups (k). effect size (f), desired power, and significance level. This was to allow me to compute the required sample size for a one-way ANOVA. Finally, I displayed the result.
 
 ```{r}
 ## Load the pwr package
@@ -268,11 +268,11 @@ anova_power <- pwr.anova.test(
 anova_power
 ```
 
-At a conceptual level Cohen’s d in a t-test tells you the difference between two groups only. This is contrasted by how Cohen’s f in ANOVA tells you how much variation there is in the outcome (of an ANOVA test) by explaining the differences between groups relative to the within group variance, across all groups involved. In essence, Cohen’s d in t-test is a difference between the means of a pair whereas Cohen’s f in ANOVA is the overall variance explained.
+At a conceptual level, Cohen’s d in a t-test tells you the difference between two groups only. This is contrasted by how Cohen’s F in ANOVA tells you how much variation there is in the outcome (of an ANOVA test) by explaining the differences between groups relative to the within-group variance, across all groups involved. In essence, Cohen’s d in t-test is a difference between the means of a pair, whereas Cohen’s f in ANOVA is the overall variance explained.
 
 ### Question 10: Authoring and indexing a deeper unnamed list
 
-The way I went about creating the three-level unnamed list is by first defining x as a list with a length of 2, where each element is itself a list. One of the nested lists has a numeric vector length of at least 3. From here I used numeric indexing \[\[ \]\] to access the third element of that numeric vector and store it as a scalar. Finally, I showed the scalar result.
+The way I went about creating the three-level unnamed list is by first defining x as a list with a length of 2, where each element is itself a list. One of the nested lists has a numeric vector length of at least 3. From here, I used numeric indexing \[\[ \]\] to access the third element of that numeric vector and store it as a scalar. Finally, I showed the scalar result.
 
 ```{r}
 ## Construct a three-level unnamed list

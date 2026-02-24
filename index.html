@@ -151,7 +151,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="question-2-wide-to-long-and-grouped-summaries" class="level3">
 <h3 class="anchored" data-anchor-id="question-2-wide-to-long-and-grouped-summaries">Question 2: Wide to long and grouped summaries</h3>
-<p>The way I tackled this quesztion was to explicitly tell R which columns represented repeated measurements of the same variable of diffent years, and to map those columns to a meaningful year value. by using “varying, v.names, and times, I can avoid relying on implicit column order make the transformation clear and reproducible. this creates a long-format data set where each row is a single observation.</p>
+<p>The way I tackled this question was to explicitly tell R which columns represented repeated measurements of the same variable in different years, and to map those columns to a meaningful year value. By using “varying, v.names, and times, I can avoid relying on implicit column order make the transformation clear and reproducible. This creates a long-format data set where each row is a single observation.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_wide <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
@@ -201,11 +201,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 3 2022 12.35811</code></pre>
 </div>
 </div>
-<p>Long format tends to be easier to plot and analyse because the information it stores is held within columns and observations are stored in rows, this matches the trend of how most plotting and modelling functions assume the data is structured. This makes it straightforward to map variables to aesthetics (x, y, colour) and to apply grouped summaries or statistical models. In brief, Whereas wide first is good for data entry, long format is better for analysis, modeling and summaries.</p>
+<p>Long format tends to be easier to plot and analyse because the information it stores is held within columns, and observations are stored in rows; this matches the trend of how most plotting and modelling functions assume the data is structured. This makes it straightforward to map variables to aesthetics (x, y, colour) and to apply grouped summaries or statistical models. In brief, whereas wide first is good for data entry, long format is better for analysis, modeling and summaries.</p>
 </section>
 <section id="question-3-controlled-randomness-and-na-handling" class="level3">
 <h3 class="anchored" data-anchor-id="question-3-controlled-randomness-and-na-handling">Question 3 : Controlled randomness and NA handling</h3>
-<p>The way I approached the coding section of this question is by first showing that mean(x) returns NA to confirm that there is missing data. Then I moved onto replacing the the NA’s with the median of non-missing values, “is.na(x)” identifies missing positions then “median(x,na.rm = TRUE)” ensures that only the observed values are computed. This results in only the missing values are replaced.I ended it with the mean(x) to show it no longer returned any NA’s.</p>
+<p>The way I approached the coding section of this question is by first showing that mean(x) returns NA to confirm that there is missing data. Then I moved onto replacing the NAs with the median of non-missing values, “is.na(x)” identifies missing positions, then “median(x,na.rm = TRUE)” ensures that only the observed values are computed. This results in only the missing values being replaced. I ended it with the mean(x) to show that it no longer returned any NAs.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">##set.seed(123) guarentees that the random number generation in R</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="do">## is repeatable and predictable for debugging,research, etc.</span><span class="al">###</span></span>
@@ -226,11 +226,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] 5.345223</code></pre>
 </div>
 </div>
-<p>One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median) it creates an artificial spike at that value, this causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results, and change the outcomes of hypothesis tests.</p>
+<p>One of the downsides of median imputation is that it distorts data distribution. When it replaces missing values with the same number (the median), it creates an artificial spike at that value. This causes two main problems: 1. Reduces natural variability and 2. Makes the distribution look more “peaked” than it really is. This can mislead research results and change the outcomes of hypothesis tests.</p>
 </section>
 <section id="question-4-writing-a-small-flexible-summary-function" class="level3">
 <h3 class="anchored" data-anchor-id="question-4-writing-a-small-flexible-summary-function">Question 4 : Writing a small, flexible summary function</h3>
-<p>I approached this question by first writing a function that confirms it’s inputs then checks if the object is a data frame, checks that the requested column exists, and that all specified columns are numeric.I then used these columns names to compute sample size,mean and standard deviation for each variable while handling missing values.</p>
+<p>I approached this question by first writing a function that confirms its inputs, then checks if the object is a data frame, checks that the requested column exists, and that all specified columns are numeric. I then used these column names to compute sample size, mean and standard deviation for each variable while handling missing values.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Define the function</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>my_summary <span class="ot">&lt;-</span> <span class="cf">function</span>(df, cols) {</span>
@@ -271,11 +271,11 @@ hp  32 146.68750 68.5628685
 wt  32   3.21725  0.9784574</code></pre>
 </div>
 </div>
-<p>Using [[ inside of a function is safer than $ for a couple of reasons. The first is due to how it is designed for programmatic access and how it can reliably work with column names stored as character strings. On the other hand, $ only works with literal names however it can perform partial matching, but this can silently return NULL if a column is missing causing bugs to be harder to detect.</p>
+<p>Using [[ inside of a function is safer than $ for a couple of reasons. The first is due to how it is designed for programmatic access and how it can reliably work with column names stored as character strings. On the other hand, $ only works with literal names; however, it can perform partial matching, but this can silently return NULL if a column is missing, causing bugs to be harder to detect.</p>
 </section>
 <section id="question-5-regular-expressions-for-variable-name-cleaning" class="level3">
 <h3 class="anchored" data-anchor-id="question-5-regular-expressions-for-variable-name-cleaning">Question 5: Regular expressions for variable name cleaning</h3>
-<p>The way I tried to approach this question was to essencually meet each specification slowly but surely, by tageting the spaces, making sure everything is lower case, punctuation, and ending it by making multiple underscores are collapsed into a single one and that names do not start with a digit. (I explain the regex choice underneath the code)</p>
+<p>The way I tried to approach this question was to essentially meet each specification slowly but surely, by targeting the spaces, making sure everything is lowercase, punctuation, and ending it by collapsing multiple underscores into a single one, and that names do not start with a digit. (I explain the regex choice underneath the code)</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"  temp.C "</span>, <span class="st">"RH(%)"</span>, <span class="st">"soil-moisture"</span>, <span class="st">"2nd_reading"</span>, <span class="st">"sensor.ID"</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -299,11 +299,11 @@ wt  32   3.21725  0.9784574</code></pre>
 [5] "sensor_id"    </code></pre>
 </div>
 </div>
-<p>The regex that I chose to use was a character class ([, (). %]) to target only the specified punctuation and replace them with underscores. I have used the broader class [^&nbsp; a - z 0-9_] to make any non-alphanumeric characters normalised safely without messing with the underscores already there. The pattern “_+” collapses runs of underscores created by multiple substitutions into a single underscore, this is to avoid messy names. Finally, I have used ^ ([0-9]) to check the start of the string so only the first digits are prefixed with “x_”, leaving the internal numbers alone.</p>
+<p>The regex that I chose to use was a character class ([, (). %]) to target only the specified punctuation and replace them with underscores. I have used the broader class [^&nbsp; a - z 0-9_] to make any non-alphanumeric characters normalised safely without messing with the underscores already there. The pattern “<em>+”</em> collapses runs of underscores created by multiple substitutions into a single underscore; this is to avoid messy names. Finally, I have used ^ ([0-9]) to check the start of the string so only the first digits are prefixed with <em>“x</em>”, leaving the internal numbers alone.</p>
 </section>
 <section id="question-6-factor-relevel-model-interpretation" class="level3">
 <h3 class="anchored" data-anchor-id="question-6-factor-relevel-model-interpretation">Question 6: Factor relevel + model interpretation</h3>
-<p>After loading in the iris data set, I then moved onto making virginica is the reference level. Next was to fitting the linear model using the sepal length and species.Finally I created a summary showing the coefficient table.</p>
+<p>After loading in the iris data set, I then moved on to making virginica the reference level. Next was fitting the linear model using the sepal length and species. Finally, I created a summary showing the coefficient table.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Load the iris dataset (built-in)</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(iris)</span>
@@ -323,11 +323,11 @@ Speciessetosa       -1.582 0.10295789 -15.365506  2.214821e-32
 Speciesversicolor   -0.652 0.10295789  -6.332686  2.765638e-09</code></pre>
 </div>
 </div>
-<p>When we change the reference level to virginica, the intercept of Sepal.Length’s mean will change from setosa to virginica. The coefficients for setosa and versicolor now measure how much their mean differs from virginica’s mean. A negative estimate would indicate that the species has a shorter average sepal length than virginica, comparatively, a positive estimate would indicate a longer one. This would not change the overall values, only the interpretation of the coefficients.</p>
+<p>When we change the reference level to virginica, the intercept of Sepal.Length’s mean will change from setosa to virginica. The coefficients for setosa and versicolor now measure how much their mean differs from virginica’s mean. A negative estimate would indicate that the species has a shorter average sepal length than virginica; comparatively, a positive estimate would indicate a longer one. This would not change the overall values, only the interpretation of the coefficients.</p>
 </section>
 <section id="question-7-operating-on-a-list-of-data-frames" class="level3">
 <h3 class="anchored" data-anchor-id="question-7-operating-on-a-list-of-data-frames">Question 7: Operating on a list of data frames</h3>
-<p>First I used lapply to return a list of means, then I used unnlist() to force the list from lapply into a numeric vector.this is to say I used unlist() to combine the results. Finally, I extracted and combined all the mpg values across the data frames before calculating the overall means.</p>
+<p>First, I used lapply to return a list of means, then I used unnlist() to force the list from lapply into a numeric vector. This is to say, I used unlist() to combine the results. Finally, I extracted and combined all the mpg values across the data frames before calculating the overall means.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> mtcars[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="fu">c</span>(<span class="st">"mpg"</span>, <span class="st">"hp"</span>)]</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> mtcars[<span class="dv">11</span><span class="sc">:</span><span class="dv">20</span>, <span class="fu">c</span>(<span class="st">"mpg"</span>, <span class="st">"hp"</span>)]</span>
@@ -359,11 +359,11 @@ Speciesversicolor   -0.652 0.10295789  -6.332686  2.765638e-09</code></pre>
 <pre><code>[1] 20.09062</code></pre>
 </div>
 </div>
-<p>do.call(rbind,…) takes a list of data frames and stacks their rows into a single data frame. It’s useful here because it lets you merge all the mpg rows from different data frames into one continuous data frame. This allows you to calculate the overall mean directly, without having to unlist first or do looping manually. In essence, it condenses the list structure into a single table making it easier for analysis.</p>
+<p>do.call(rbind,…) takes a list of data frames and stacks their rows into a single data frame. It’s useful here because it lets you merge all the mpg rows from different data frames into one continuous data frame. This allows you to calculate the overall mean directly, without having to unlist first or do looping manually. In essence, it condenses the list structure into a single table, making it easier for analysis.</p>
 </section>
 <section id="question-8-matrix-vs-data-frame-behavior" class="level3">
 <h3 class="anchored" data-anchor-id="question-8-matrix-vs-data-frame-behavior">Question 8: Matrix vs data frame behavior</h3>
-<p>I started this question by showing the matrix first then demonstrated that arithmetic on a numeric matrix works as they are all numeric. I then converted the matrix into a data frame and added a fctor column. I attempted to do an multiply the data frame by 2 however due to the data frame now containing a non-numeric column this failed. to show that I could still do an arithmetic I used a subset of data within the data frame only using the numeric columns.</p>
+<p>I started this question by showing the matrix first, then demonstrated that arithmetic on a numeric matrix works as they are all numeric. I then converted the matrix into a data frame and added a factor column. I attempted to multiply the data frame by 2; however, due to the data frame now containing a non-numeric column, this failed. To show that I could still do arithmetic, I used a subset of data within the data frame, only using the numeric columns.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(m) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"D"</span>)</span>
@@ -421,7 +421,7 @@ Speciesversicolor   -0.652 0.10295789  -6.332686  2.765638e-09</code></pre>
 </section>
 <section id="question-9-power-analysis-with-a-different-function" class="level3">
 <h3 class="anchored" data-anchor-id="question-9-power-analysis-with-a-different-function">Question 9: Power analysis with a different function</h3>
-<p>Following the instruction to load the pwr package, I proceeded to set the number of groups (k). effect size (f), desired power, and significant level. this was to allow me to compute the required sample size for a one-way ANOVA. Finally I displayed the result.</p>
+<p>Following the instruction to load the pwr package, I proceeded to set the number of groups (k). effect size (f), desired power, and significance level. This was to allow me to compute the required sample size for a one-way ANOVA. Finally, I displayed the result.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Load the pwr package</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pwr)</span>
@@ -453,11 +453,11 @@ Speciesversicolor   -0.652 0.10295789  -6.332686  2.765638e-09</code></pre>
 NOTE: n is number in each group</code></pre>
 </div>
 </div>
-<p>At a conceptual level Cohen’s d in a t-test tells you the difference between two groups only. This is contrasted by how Cohen’s f in ANOVA tells you how much variation there is in the outcome (of an ANOVA test) by explaining the differences between groups relative to the within group variance, across all groups involved. In essence, Cohen’s d in t-test is a difference between the means of a pair whereas Cohen’s f in ANOVA is the overall variance explained.</p>
+<p>At a conceptual level, Cohen’s d in a t-test tells you the difference between two groups only. This is contrasted by how Cohen’s F in ANOVA tells you how much variation there is in the outcome (of an ANOVA test) by explaining the differences between groups relative to the within-group variance, across all groups involved. In essence, Cohen’s d in t-test is a difference between the means of a pair, whereas Cohen’s f in ANOVA is the overall variance explained.</p>
 </section>
 <section id="question-10-authoring-and-indexing-a-deeper-unnamed-list" class="level3">
 <h3 class="anchored" data-anchor-id="question-10-authoring-and-indexing-a-deeper-unnamed-list">Question 10: Authoring and indexing a deeper unnamed list</h3>
-<p>The way I went about creating the three-level unnamed list is by first defining x as a list with a length of 2, where each element is itself a list. One of the nested lists has a numeric vector length of at least 3. From here I used numeric indexing [[ ]] to access the third element of that numeric vector and store it as a scalar. Finally, I showed the scalar result.</p>
+<p>The way I went about creating the three-level unnamed list is by first defining x as a list with a length of 2, where each element is itself a list. One of the nested lists has a numeric vector length of at least 3. From here, I used numeric indexing [[ ]] to access the third element of that numeric vector and store it as a scalar. Finally, I showed the scalar result.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Construct a three-level unnamed list</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
